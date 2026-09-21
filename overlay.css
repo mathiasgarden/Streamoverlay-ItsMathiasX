@@ -1,0 +1,55 @@
+/* Overlay til OBS. Bakgrunnen er gjennomsiktig. */
+:root{
+  --lilla:#BE4BF5; --lilladyp:#7A2BC7; --bla:#3B7BF5;
+  --a:.25; --blur:1;
+  --ft:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fn:'Barlow Semi Condensed','Montserrat',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:transparent;overflow:hidden}
+body{padding:12px;font-family:var(--ft);-webkit-font-smoothing:antialiased;color:#fff}
+
+.plass{width:430px;opacity:0;transition:opacity .4s}
+.plass.klar{opacity:1}
+
+.plate{
+  position:relative;border-radius:6px;overflow:hidden;padding:12px 16px 13px 19px;
+  background:linear-gradient(135deg,rgba(16,7,28,var(--a)),rgba(6,3,11,calc(var(--a) * .85)));
+  -webkit-backdrop-filter:blur(calc(var(--a) * var(--blur) * 22px));
+  backdrop-filter:blur(calc(var(--a) * var(--blur) * 22px));
+  border:1px solid rgba(255,255,255,calc(var(--a) * .2));
+}
+.plate::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--bla),var(--lilla));
+  box-shadow:0 0 12px rgba(190,75,245,.55);
+}
+body.uten .plate{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-color:transparent}
+
+.sk{text-shadow:0 1px 3px rgba(0,0,0,calc(1 - var(--a) * 1.1)),0 2px 10px rgba(0,0,0,calc(.95 - var(--a) * 1.2))}
+body.uten .sk{text-shadow:0 1px 3px #000,0 2px 10px rgba(0,0,0,.95)}
+
+.rad{display:flex;align-items:center;gap:10px;margin-bottom:6px;width:100%}
+.tittel{font-size:15px;font-weight:800;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tittel:empty{display:none}
+.etikett{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72);white-space:nowrap;flex-shrink:0}
+.tittel:not(:empty) + .etikett::before{content:"·";margin-right:9px;color:rgba(255,255,255,.4)}
+.pst{margin-left:auto;flex-shrink:0;font-family:var(--fn);font-size:18px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+
+.spor{position:relative;height:22px;background:rgba(8,4,14,calc(.62 - var(--a) * .9));border:1px solid rgba(255,255,255,.16);border-radius:3px;overflow:hidden}
+body.uten .spor{background:rgba(8,4,14,.62)}
+.fyll{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--bla),var(--lilladyp) 45%,var(--lilla));box-shadow:0 0 18px -3px var(--lilla);transition:width .9s cubic-bezier(.22,1,.36,1)}
+.fyll::after{content:"";position:absolute;top:0;right:0;bottom:0;width:2.5px;background:#fff;box-shadow:0 0 12px 2px rgba(255,255,255,.7)}
+.glans{position:absolute;top:0;bottom:0;width:55px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:sveip 3.4s linear infinite}
+@keyframes sveip{from{left:-65px}to{left:100%}}
+
+.bunn{display:flex;align-items:baseline;gap:7px;margin-top:7px}
+.na{font-family:var(--fn);font-weight:700;font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
+.av{font-family:var(--fn);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.72)}
+.splitt{margin-left:auto;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.splitt b{color:#C9B6FF}
+
+.puls .spor{animation:puls .7s ease}
+.puls .na{animation:hopp .7s ease}
+@keyframes puls{0%{filter:brightness(1)}30%{filter:brightness(1.9)}100%{filter:brightness(1)}}
+@keyframes hopp{0%{transform:scale(1)}30%{transform:scale(1.12)}100%{transform:scale(1)}}

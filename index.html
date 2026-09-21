@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Måltavle admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;1,800&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lilla:#BE4BF5; --bla:#3B7BF5; --rosa:#FF4FC3; --gronn:#5EE6A8;
+    --svart:#07040C; --panel:#120A1C; --panel2:#1A0F28;
+    --kantf:rgba(190,75,245,.26); --kant2:rgba(255,255,255,.09);
+    --tekst:#F4EEFA; --svak:#A794BA;
+    --ft:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --fn:'Barlow Semi Condensed','Montserrat',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--svart);color:var(--tekst);font-family:var(--ft);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:22px 16px 80px}
+  [hidden]{display:none!important}
+
+  .knapp{font-family:var(--ft);font-size:11.5px;font-weight:800;letter-spacing:.05em;padding:8px 13px;border-radius:8px;cursor:pointer;color:var(--tekst);background:rgba(190,75,245,.12);border:1px solid var(--kantf)}
+  .knapp:hover{background:rgba(190,75,245,.26)}
+  .knapp:disabled{opacity:.5;cursor:default}
+  .knapp.primar{background:var(--lilla);border-color:var(--lilla);color:#120A1C}
+  .knapp.fare{background:rgba(255,79,195,.1);border-color:rgba(255,79,195,.4)}
+  .knapp.fare.bekreft{background:var(--rosa);border-color:var(--rosa);color:#1a0612}
+  button[aria-pressed="true"]{background:var(--lilla);border-color:var(--lilla);color:#120A1C}
+  .lenkeknapp{background:none;border:0;color:var(--svak);font:600 12px var(--ft);text-decoration:underline;cursor:pointer;padding:0}
+
+  .merke{width:52px;height:52px;display:grid;place-items:center;font-weight:800;font-style:italic;font-size:14px;border-radius:8px;background:linear-gradient(140deg,var(--bla),var(--lilla));color:#0b0510;flex-shrink:0}
+
+  /* innlogging */
+  .login{max-width:380px;margin:8vh auto 0;border:1px solid var(--kantf);border-radius:14px;padding:38px 24px;background:radial-gradient(90% 70% at 50% 0%,rgba(190,75,245,.16),transparent 65%),var(--panel);text-align:center}
+  .login .merke{margin:0 auto 16px}
+  .login h1{margin:0 0 4px;font-size:20px;font-weight:800}
+  .login p{margin:0 0 22px;color:var(--svak);font-size:13px;font-weight:600}
+  .login form{text-align:left;display:flex;flex-direction:column;gap:12px}
+  .huk{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--svak)}
+  .huk input{accent-color:var(--lilla);width:16px;height:16px}
+  .melding{font-size:12.5px;font-weight:700;min-height:18px;margin:0}
+  .melding.feil{color:#FF8FB8}
+  .melding.ok{color:var(--gronn)}
+
+  /* admin */
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--kantf);margin-bottom:16px}
+  .topbar .merke{width:34px;height:34px;font-size:11px;border-radius:6px}
+  .hvem{font-size:12px;font-weight:700;color:var(--svak);min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .hvem b{color:var(--tekst);display:block;font-size:13px}
+  .topbar .knapp{margin-left:auto}
+
+  .kort{background:var(--panel);border:1px solid var(--kant2);border-radius:12px;padding:16px}
+  .rutenett{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(265px,1fr))}
+  .stabel{display:grid;gap:14px;margin-top:14px}
+  .korttopp{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .strek{width:4px;height:16px;border-radius:1px;background:linear-gradient(180deg,var(--bla),var(--lilla));flex-shrink:0}
+  .korttopp h2{margin:0;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .korttopp small{margin-left:auto;font-size:11px;font-weight:700;color:var(--svak)}
+
+  label.felt{display:block;margin-bottom:11px}
+  label.felt span{display:block;font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--svak);margin-bottom:5px}
+  input[type=text],input[type=number],input[type=email],input[type=password]{width:100%;padding:9px 11px;border-radius:8px;font-family:var(--ft);font-size:13.5px;font-weight:600;background:var(--panel2);border:1px solid var(--kant2);color:var(--tekst)}
+  input:focus{outline:none;border-color:var(--lilla);box-shadow:0 0 0 3px rgba(190,75,245,.16)}
+  input[type=range]{accent-color:var(--lilla);width:100%}
+  .to{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:8px;background:var(--panel2);border:1px dashed var(--kant2);flex-wrap:wrap;margin-bottom:10px}
+  .status .tall{font-family:var(--fn);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .status small{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--svak);margin-bottom:3px}
+  .status .detalj{display:block;font-size:11px;font-weight:700;color:var(--svak);margin-top:4px}
+  .nullrad{display:flex;gap:6px}
+  .manuell{display:flex;gap:8px}
+  .manuell input{flex:1}
+  .hint{margin:5px 0 0;font-size:11px;font-weight:600;color:var(--svak);line-height:1.45}
+
+  .styrke{display:flex;align-items:center;gap:14px}
+  .verdi{font-family:var(--fn);font-weight:700;font-size:24px;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+
+  .gruppe + .gruppe{margin-top:14px}
+  .gruppe h3{margin:0 0 7px;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  .lenke{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--kant2);margin-bottom:6px}
+  .merkelapp{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:5px;flex-shrink:0}
+  .merkelapp.med{background:rgba(190,75,245,.18);color:#E3B8FF}
+  .merkelapp.uten{background:rgba(59,123,245,.16);color:#B8CEFF}
+  .merkelapp.lytt{background:rgba(94,230,168,.14);color:#9DF0C8}
+  .lenke code{font-family:var(--fn);font-size:13px;color:var(--svak);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .lenke .knapp{margin-left:auto;flex-shrink:0}
+  .lenke .knapp.kopiert{background:var(--gronn);border-color:var(--gronn);color:#08120d}
+
+  .forhand{position:relative;border-radius:10px;overflow:hidden;height:160px;border:1px solid var(--kant2);
+    background:radial-gradient(90% 80% at 25% 20%,#2f7ab5 0%,transparent 58%),radial-gradient(80% 70% at 80% 75%,#7a3568 0%,transparent 62%),linear-gradient(160deg,#16283c,#2d2138)}
+  .forhand iframe{position:absolute;left:8px;bottom:8px;width:460px;height:135px;border:0;max-width:calc(100% - 16px)}
+  .knapper{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+
+  .logg{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+  .logg li{display:flex;gap:10px;font-size:12.5px;font-weight:600;padding:7px 10px;border-radius:7px;background:var(--panel2)}
+  .logg time{color:var(--svak);font-family:var(--fn);font-size:13px;flex-shrink:0;min-width:74px}
+  .tom{color:var(--svak);font-size:12.5px;font-weight:600}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+    padding:10px 16px;border-radius:9px;font-size:12.5px;font-weight:800;background:var(--gronn);color:#08120d;transition:all .25s}
+  .toast.vis{opacity:1;transform:translateX(-50%)}
+  .toast.feil{background:#FF8FB8;color:#2a0714}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Innlogging -->
+  <section class="login" id="v-login" hidden>
+    <div class="merke">IMX</div>
+    <h1>Måltavle</h1>
+    <p>Logg inn for å styre målene dine</p>
+    <form id="loginskjema">
+      <label class="felt"><span>E post</span><input type="email" id="epost" autocomplete="username" required></label>
+      <label class="felt"><span>Passord</span><input type="password" id="passord" autocomplete="current-password" required></label>
+      <label class="huk"><input type="checkbox" id="husk" checked> Husk meg på denne maskinen</label>
+      <button class="knapp primar" style="padding:11px" id="loggInn">Logg inn</button>
+      <p class="melding" id="loginmelding"></p>
+      <button type="button" class="lenkeknapp" id="glemt">Glemt passord?</button>
+    </form>
+  </section>
+
+  <!-- Ingen tilgang -->
+  <section class="login" id="v-nei" hidden>
+    <div class="merke">IMX</div>
+    <h1>Ingen tilgang</h1>
+    <p>Denne brukeren har ikke lov til å styre tavla.</p>
+    <button class="knapp" data-loggut>Logg ut</button>
+  </section>
+
+  <!-- Admin -->
+  <section id="v-admin" hidden>
+    <div class="topbar">
+      <div class="merke">IMX</div>
+      <div class="hvem"><b>Måltavle</b><span id="brukernavn"></span></div>
+      <button class="knapp" data-loggut>Logg ut</button>
+    </div>
+
+    <div class="rutenett">
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Kombinert</h2></div>
+        <label class="felt"><span>Måltekst</span><input type="text" data-mal="kombo" data-felt="tittel" maxlength="60"></label>
+        <label class="felt"><span>Mål i kroner</span><input type="number" min="0" data-mal="kombo" data-felt="maal"></label>
+        <div class="status">
+          <div><small>Nå</small><span class="tall" id="n-kombo">0</span><span class="detalj" id="d-kombo"></span></div>
+          <div class="nullrad" data-null="kombo"></div>
+        </div>
+        <p class="hint">Subs regnes om til kroner med satsene under, pluss donasjoner og bits.</p>
+      </div>
+
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Subs</h2></div>
+        <label class="felt"><span>Måltekst</span><input type="text" data-mal="subs" data-felt="tittel" maxlength="60"></label>
+        <label class="felt"><span>Mål i antall subs</span><input type="number" min="0" data-mal="subs" data-felt="maal"></label>
+        <div class="status">
+          <div><small>Nå</small><span class="tall" id="n-subs">0</span></div>
+          <div class="nullrad" data-null="subs"></div>
+        </div>
+        <div class="manuell">
+          <input type="number" id="m-subs" placeholder="Antall subs" step="1">
+          <button class="knapp" data-manuell="subs">Legg til</button>
+        </div>
+        <p class="hint">For subs som kom mens lytteren var av. Minus trekker fra.</p>
+      </div>
+
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Donasjoner</h2></div>
+        <label class="felt"><span>Måltekst</span><input type="text" data-mal="dono" data-felt="tittel" maxlength="60"></label>
+        <label class="felt"><span>Mål i kroner</span><input type="number" min="0" data-mal="dono" data-felt="maal"></label>
+        <div class="status">
+          <div><small>Nå</small><span class="tall" id="n-dono">0</span></div>
+          <div class="nullrad" data-null="dono"></div>
+        </div>
+        <div class="manuell">
+          <input type="number" id="m-dono" placeholder="Kroner" step="1">
+          <button class="knapp" data-manuell="dono">Legg til</button>
+        </div>
+        <p class="hint">For donasjoner som kom mens lytteren var av. Minus trekker fra.</p>
+      </div>
+    </div>
+
+    <div class="stabel">
+      <div class="rutenett">
+        <div class="kort">
+          <div class="korttopp"><i class="strek"></i><h2>Hva en sub er verdt</h2></div>
+          <div class="to">
+            <label class="felt"><span>Tier 1, kr</span><input type="number" min="0" data-innst="tier1"></label>
+            <label class="felt"><span>Tier 2, kr</span><input type="number" min="0" data-innst="tier2"></label>
+          </div>
+          <div class="to">
+            <label class="felt"><span>Tier 3, kr</span><input type="number" min="0" data-innst="tier3"></label>
+            <label class="felt"><span>Kr per 100 bits</span><input type="number" min="0" data-innst="bits"></label>
+          </div>
+          <label class="huk"><input type="checkbox" data-innst="gave"> Gaveabonnement teller med</label>
+          <p class="hint">Prime subs teller som tier 1. Bits telles som donasjon.</p>
+        </div>
+
+        <div class="kort">
+          <div class="korttopp"><i class="strek"></i><h2>Platen</h2><small>Gjelder versjonen med plate</small></div>
+          <div class="styrke">
+            <input type="range" min="5" max="60" data-innst="plate" aria-label="Styrke på platen">
+            <span class="verdi" id="plateverdi">25</span>
+          </div>
+          <p class="hint">Dra ned for svakere plate. Vises i OBS med en gang.</p>
+          <label class="huk" style="margin-top:12px"><input type="checkbox" data-innst="slor"> Slør bak platen</label>
+        </div>
+      </div>
+
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Forhåndsvisning</h2></div>
+        <div class="knapper" id="fv-teller">
+          <button class="knapp" data-t="kombinert" aria-pressed="true">Kombinert</button>
+          <button class="knapp" data-t="subs" aria-pressed="false">Subs</button>
+          <button class="knapp" data-t="donasjoner" aria-pressed="false">Donasjoner</button>
+        </div>
+        <div class="knapper" id="fv-plate">
+          <button class="knapp" data-p="med" aria-pressed="true">Med plate</button>
+          <button class="knapp" data-p="uten" aria-pressed="false">Uten plate</button>
+        </div>
+        <div class="forhand"><iframe id="fv" title="Forhåndsvisning av overlay"></iframe></div>
+      </div>
+
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Lenker til OBS</h2><small>Browser Source, 460 × 135</small></div>
+        <div id="lenker"></div>
+      </div>
+
+      <div class="kort">
+        <div class="korttopp"><i class="strek"></i><h2>Siste hendelser</h2></div>
+        <ul class="logg" id="hendelser"><li class="tom">Ingenting registrert ennå.</li></ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { app, db, ADMINER, STANDARD, tall, kr } from "./firebase.js";
+import { ref, onValue, update, set, push, increment, query, orderByChild, limitToLast }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence,
+  browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth = getAuth(app);
+const $ = id => document.getElementById(id);
+const alle = s => Array.from(document.querySelectorAll(s));
+const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+
+let data = { mal: {}, tall: {}, innst: { ...STANDARD } };
+let startet = false;
+
+/* ---------- visninger ---------- */
+function vis(hvilken) {
+  $("v-login").hidden = hvilken !== "login";
+  $("v-nei").hidden = hvilken !== "nei";
+  $("v-admin").hidden = hvilken !== "admin";
+}
+
+let toastTid;
+function toast(tekst, feil) {
+  const t = $("toast");
+  t.textContent = tekst;
+  t.classList.toggle("feil", !!feil);
+  t.classList.add("vis");
+  clearTimeout(toastTid);
+  toastTid = setTimeout(() => t.classList.remove("vis"), feil ? 3500 : 1500);
+}
+
+/* ---------- innlogging ---------- */
+$("loginskjema").addEventListener("submit", async e => {
+  e.preventDefault();
+  const m = $("loginmelding");
+  m.className = "melding"; m.textContent = "Logger inn";
+  $("loggInn").disabled = true;
+  try {
+    await setPersistence(auth, $("husk").checked ? browserLocalPersistence : browserSessionPersistence);
+    await signInWithEmailAndPassword(auth, $("epost").value.trim(), $("passord").value);
+    m.textContent = "";
+  } catch (err) {
+    m.className = "melding feil";
+    m.textContent = err.code === "auth/too-many-requests"
+      ? "For mange forsøk. Vent litt og prøv igjen."
+      : "Feil e post eller passord.";
+  }
+  $("loggInn").disabled = false;
+});
+
+$("glemt").addEventListener("click", async () => {
+  const m = $("loginmelding"), epost = $("epost").value.trim();
+  if (!epost) { m.className = "melding feil"; m.textContent = "Skriv inn e posten din først."; return; }
+  try {
+    await sendPasswordResetEmail(auth, epost);
+    m.className = "melding ok"; m.textContent = "Sjekk e posten din for en lenke.";
+  } catch { m.className = "melding feil"; m.textContent = "Klarte ikke sende e post."; }
+});
+
+alle("[data-loggut]").forEach(b => b.addEventListener("click", () => signOut(auth)));
+
+onAuthStateChanged(auth, user => {
+  if (!user) { vis("login"); return; }
+  if (!ADMINER.includes(user.uid)) { vis("nei"); return; }
+  $("brukernavn").textContent = user.email || "";
+  vis("admin");
+  if (!startet) { startet = true; start(); }
+});
+
+/* ---------- data inn ---------- */
+function start() {
+  onValue(ref(db, "mal"), s => { data.mal = s.val() || {}; fyll(); tegnTall(); });
+  onValue(ref(db, "tall"), s => { data.tall = s.val() || {}; tegnTall(); });
+  onValue(ref(db, "innst"), s => { data.innst = { ...STANDARD, ...(s.val() || {}) }; fyll(); tegnTall(); });
+  onValue(query(ref(db, "hendelser"), orderByChild("tid"), limitToLast(12)), s => {
+    const liste = [];
+    s.forEach(b => { liste.push(b.val()); });
+    tegnHendelser(liste.reverse());
+  });
+  lagLenker();
+  settForhand();
+}
+
+// Fyller feltene, men lar være feltet du står og skriver i
+function fyll() {
+  alle("[data-mal]").forEach(inp => {
+    if (inp === document.activeElement) return;
+    const v = (data.mal[inp.dataset.mal] || {})[inp.dataset.felt];
+    inp.value = v ?? "";
+  });
+  alle("[data-innst]").forEach(inp => {
+    if (inp === document.activeElement) return;
+    const v = data.innst[inp.dataset.innst];
+    if (inp.type === "checkbox") inp.checked = v !== false;
+    else inp.value = v ?? "";
+  });
+  $("plateverdi").textContent = tall(data.innst.plate);
+}
+
+function tegnTall() {
+  const t = data.tall, i = data.innst;
+  const s = t.subs || {}, d = t.dono || {}, k = t.kombo || {};
+  const subsKr = tall(k.t1) * tall(i.tier1) + tall(k.t2) * tall(i.tier2) + tall(k.t3) * tall(i.tier3);
+  const antall = tall(k.t1) + tall(k.t2) + tall(k.t3);
+  $("n-kombo").textContent = kr(subsKr + tall(k.kr)) + " kr";
+  $("d-kombo").textContent = `${antall} subs (${kr(subsKr)} kr) + ${kr(tall(k.kr))} kr`;
+  $("n-subs").textContent = kr(tall(s.antall));
+  $("n-dono").textContent = kr(tall(d.kr)) + " kr";
+}
+
+function tegnHendelser(liste) {
+  const ul = $("hendelser");
+  if (!liste.length) { ul.innerHTML = '<li class="tom">Ingenting registrert ennå.</li>'; return; }
+  ul.innerHTML = "";
+  liste.forEach(h => {
+    const li = document.createElement("li");
+    const tid = document.createElement("time");
+    const dato = new Date(tall(h.tid));
+    tid.textContent = dato.toLocaleDateString("nb-NO", { day: "numeric", month: "short" }) + " "
+      + dato.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+    const tekst = document.createElement("span");
+    tekst.textContent = h.tekst || "";
+    li.append(tid, tekst);
+    ul.append(li);
+  });
+}
+
+/* ---------- lagring ---------- */
+alle("[data-mal]").forEach(inp => inp.addEventListener("change", async () => {
+  const verdi = inp.dataset.felt === "maal" ? Math.max(0, tall(inp.value)) : inp.value.trim();
+  try { await update(ref(db, "mal/" + inp.dataset.mal), { [inp.dataset.felt]: verdi }); toast("Lagret"); }
+  catch { toast("Kunne ikke lagre", true); }
+}));
+
+alle("[data-innst]").forEach(inp => {
+  if (inp.type === "range") inp.addEventListener("input", () => { $("plateverdi").textContent = inp.value; });
+  inp.addEventListener("change", async () => {
+    const verdi = inp.type === "checkbox" ? inp.checked : Math.max(0, tall(inp.value));
+    try { await update(ref(db, "innst"), { [inp.dataset.innst]: verdi }); toast("Lagret"); }
+    catch { toast("Kunne ikke lagre", true); }
+  });
+});
+
+function loggHendelse(tekst) {
+  return push(ref(db, "hendelser"), { type: "admin", tekst, tid: Date.now() });
+}
+
+/* ---------- manuell registrering ---------- */
+alle("[data-manuell]").forEach(b => b.addEventListener("click", async () => {
+  const hva = b.dataset.manuell, felt = $("m-" + hva), x = Math.round(tall(felt.value));
+  if (!x) return;
+  const endring = hva === "subs"
+    ? { "tall/subs/antall": increment(x), "tall/kombo/t1": increment(x) }
+    : { "tall/dono/kr": increment(x), "tall/kombo/kr": increment(x) };
+  try {
+    await update(ref(db), endring);
+    await loggHendelse(`Manuelt: ${x > 0 ? "+" : ""}${x} ${hva === "subs" ? "subs" : "kr"}`);
+    felt.value = ""; toast("Lagt til");
+  } catch { toast("Kunne ikke lagre", true); }
+}));
+
+/* ---------- nullstill med bekreftelse ---------- */
+const NULL = {
+  kombo: { sti: "tall/kombo", verdi: { t1: 0, t2: 0, t3: 0, kr: 0 }, navn: "Kombinert" },
+  subs: { sti: "tall/subs", verdi: { antall: 0 }, navn: "Subs" },
+  dono: { sti: "tall/dono", verdi: { kr: 0 }, navn: "Donasjoner" }
+};
+alle(".nullrad").forEach(rad => {
+  const vanlig = () => { rad.innerHTML = '<button class="knapp fare">Nullstill</button>'; };
+  vanlig();
+  rad.addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.valg === "nei") { vanlig(); return; }
+    if (b.dataset.valg === "ja") {
+      const n = NULL[rad.dataset.null];
+      try { await set(ref(db, n.sti), n.verdi); await loggHendelse(n.navn + " nullstilt"); toast("Nullstilt"); }
+      catch { toast("Kunne ikke nullstille", true); }
+      vanlig(); return;
+    }
+    rad.innerHTML = '<button class="knapp fare bekreft" data-valg="ja">Ja, nullstill</button><button class="knapp" data-valg="nei">Avbryt</button>';
+  });
+});
+
+/* ---------- lenker og forhåndsvisning ---------- */
+function lagLenker() {
+  const grupper = [
+    ["Kombinert", "kombinert.html"], ["Subs", "subs.html"], ["Donasjoner", "donasjoner.html"]
+  ];
+  let html = grupper.map(([navn, fil]) => `
+    <div class="gruppe"><h3>${navn}</h3>
+      <div class="lenke"><span class="merkelapp med">Med plate</span><code>${base}${fil}</code><button class="knapp kopi">Kopier</button></div>
+      <div class="lenke"><span class="merkelapp uten">Uten plate</span><code>${base}${fil}?plate=av</code><button class="knapp kopi">Kopier</button></div>
+    </div>`).join("");
+  html += `
+    <div class="gruppe"><h3>Lytter</h3>
+      <div class="lenke"><span class="merkelapp lytt">Alltid på</span><code>${base}lytter.html</code><button class="knapp kopi">Kopier</button></div>
+      <p class="hint">Legges inn én gang i OBS. Skru av "Shutdown source when not visible" så den teller uansett hvilken scene du er i.</p>
+    </div>`;
+  $("lenker").innerHTML = html;
+  alle(".kopi").forEach(b => b.addEventListener("click", async () => {
+    const tekst = b.parentNode.querySelector("code").textContent;
+    try { await navigator.clipboard.writeText(tekst); }
+    catch { const r = document.createRange(); r.selectNode(b.parentNode.querySelector("code")); getSelection().removeAllRanges(); getSelection().addRange(r); }
+    b.textContent = "Kopiert"; b.classList.add("kopiert");
+    setTimeout(() => { b.textContent = "Kopier"; b.classList.remove("kopiert"); }, 1500);
+  }));
+}
+
+let fvTeller = "kombinert", fvPlate = "med";
+function settForhand() { $("fv").src = base + fvTeller + ".html" + (fvPlate === "uten" ? "?plate=av" : ""); }
+function velger(id, fn) {
+  $(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    fn(b);
+    $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    settForhand();
+  });
+}
+velger("fv-teller", b => { fvTeller = b.dataset.t; });
+velger("fv-plate", b => { fvPlate = b.dataset.p; });
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Lytter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--lilla:#BE4BF5;--bla:#3B7BF5;--gronn:#5EE6A8;--rod:#FF8FB8;--gul:#FFD37A;
+    --svart:#07040C;--panel:#120A1C;--panel2:#1A0F28;--kant2:rgba(255,255,255,.09);--kantf:rgba(190,75,245,.26);
+    --tekst:#F4EEFA;--svak:#A794BA;
+    --ft:'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;--fn:'Barlow Semi Condensed','Montserrat',system-ui,sans-serif}
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--svart);color:var(--tekst);font-family:var(--ft);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:22px 16px 60px}
+  [hidden]{display:none!important}
+  h1{margin:0 0 4px;font-size:22px;font-weight:800}
+  .ing{margin:0 0 16px;font-size:13px;font-weight:600;color:var(--svak);line-height:1.55}
+  .kort{background:var(--panel);border:1px solid var(--kant2);border-radius:12px;padding:16px;margin-bottom:12px}
+  .kort h2{margin:0 0 12px;font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+  label.felt{display:block;margin-bottom:11px}
+  label.felt span{display:block;font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--svak);margin-bottom:5px}
+  input[type=text],input[type=email],input[type=password]{width:100%;padding:9px 11px;border-radius:8px;font:600 13.5px var(--ft);background:var(--panel2);border:1px solid var(--kant2);color:var(--tekst)}
+  input:focus{outline:none;border-color:var(--lilla);box-shadow:0 0 0 3px rgba(190,75,245,.16)}
+  .huk{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--svak);margin-top:4px}
+  .huk input{accent-color:var(--lilla);width:16px;height:16px}
+  .knapper{display:flex;gap:8px;flex-wrap:wrap}
+  .knapp{font:800 12px var(--ft);letter-spacing:.05em;padding:10px 15px;border-radius:8px;cursor:pointer;color:var(--tekst);background:rgba(190,75,245,.12);border:1px solid var(--kantf)}
+  .knapp.primar{background:var(--lilla);border-color:var(--lilla);color:#120A1C}
+  .knapp:disabled{opacity:.45;cursor:default}
+  .statuslinje{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:var(--panel2);font-size:13.5px;font-weight:800;margin-bottom:12px}
+  .prikk{width:11px;height:11px;border-radius:50%;background:var(--svak);flex-shrink:0}
+  .statuslinje.pa .prikk{background:var(--gronn);box-shadow:0 0 10px var(--gronn)}
+  .statuslinje.feil .prikk{background:var(--rod);box-shadow:0 0 10px var(--rod)}
+  .statuslinje.venter .prikk{background:var(--gul)}
+  .hint{margin:6px 0 0;font-size:11.5px;font-weight:600;color:var(--svak);line-height:1.5}
+  .innlogget{font-size:12.5px;font-weight:700;color:var(--svak);margin:0 0 11px}
+  .innlogget b{color:var(--tekst)}
+  .logg{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:340px;overflow:auto}
+  .logg li{font-size:12.5px;font-weight:600;padding:6px 9px;border-radius:6px;background:var(--panel2);display:flex;gap:9px}
+  .logg time{color:var(--svak);font-family:var(--fn);flex-shrink:0}
+  .logg .ok{color:var(--gronn)} .logg .feil{color:var(--rod)} .logg .adv{color:var(--gul)} .logg .svak{color:var(--svak)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lytter</h1>
+  <p class="ing">Henter donasjoner, subs og bits fra StreamElements og legger dem i tavla. Den teller bare mens denne siden er åpen, så den bør ligge som en kilde i OBS.</p>
+
+  <div class="statuslinje" id="status"><span class="prikk"></span><span id="statustekst">Starter</span></div>
+
+  <div class="kort">
+    <h2>Oppsett</h2>
+    <p class="innlogget" id="innlogget" hidden></p>
+    <div id="loginfelt">
+      <label class="felt"><span>E post til tavla</span><input type="email" id="epost" autocomplete="username"></label>
+      <label class="felt"><span>Passord til tavla</span><input type="password" id="passord" autocomplete="current-password"></label>
+    </div>
+    <label class="felt"><span>StreamElements JWT token</span><input type="password" id="jwt" placeholder="Limes inn fra StreamElements"></label>
+    <p class="hint">Tokenet lagres bare på denne maskinen. Det havner aldri på GitHub eller i databasen.</p>
+    <label class="huk" style="margin-top:12px"><input type="checkbox" id="test"> Tell testhendelser fra StreamElements</label>
+    <p class="hint">Bare for å teste. Husk å skru av og nullstille etterpå.</p>
+  </div>
+
+  <div class="knapper" style="margin-bottom:12px">
+    <button class="knapp primar" id="start">Koble til</button>
+    <button class="knapp" id="stopp" disabled>Koble fra</button>
+    <button class="knapp" id="glem">Glem tokenet</button>
+  </div>
+
+  <div class="kort">
+    <h2>Logg</h2>
+    <ul class="logg" id="logg"></ul>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script type="module">
+import { app, db, ADMINER, STANDARD } from "./firebase.js";
+import { beregn, fraTest } from "./hendelse.js";
+import { ref, onValue, update, runTransaction, increment }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence, setPersistence }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth = getAuth(app);
+const $ = id => document.getElementById(id);
+const NOKKEL_JWT = "maltavle_jwt", NOKKEL_TEST = "maltavle_test";
+
+let innst = { ...STANDARD };
+let socket = null, bruker = null, lytterInnst = false;
+
+/* ---------- hjelpere ---------- */
+function status(tekst, klasse) {
+  $("statustekst").textContent = tekst;
+  $("status").className = "statuslinje " + (klasse || "");
+}
+function logg(tekst, klasse) {
+  const li = document.createElement("li");
+  const tid = document.createElement("time");
+  tid.textContent = new Date().toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const s = document.createElement("span");
+  s.textContent = tekst; if (klasse) s.className = klasse;
+  li.append(tid, s);
+  const ul = $("logg"); ul.prepend(li);
+  while (ul.children.length > 80) ul.lastChild.remove();
+}
+function les(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function skriv(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
+
+$("jwt").value = les(NOKKEL_JWT) || "";
+$("test").checked = les(NOKKEL_TEST) === "1";
+$("test").addEventListener("change", () => skriv(NOKKEL_TEST, $("test").checked ? "1" : "0"));
+
+/* ---------- registrering ---------- */
+async function registrer(r) {
+  try {
+    const res = await runTransaction(ref(db, "hendelser/" + r.id), naa =>
+      naa === null ? { type: r.type, tekst: r.tekst, tid: Date.now() } : undefined);
+    if (!res.committed) { logg("Allerede telt: " + r.tekst, "svak"); return; }
+    const endringer = {};
+    for (const [sti, verdi] of Object.entries(r.endringer)) endringer[sti] = increment(verdi);
+    await update(ref(db), endringer);
+    logg("Telt: " + r.tekst, "ok");
+    if (r.advarsel) logg(r.advarsel, "adv");
+  } catch (err) {
+    logg("Klarte ikke lagre " + r.tekst + " (" + (err.code || err.message) + ")", "feil");
+  }
+}
+
+function handter(e, erTest) {
+  const r = beregn(e, innst);
+  if (!r) {
+    if (e && ["tip", "cheer", "subscriber"].includes(e.type) && !(e.data && e.data.isCommunityGift)) {
+      logg("Hoppet over en " + e.type + " hendelse", "svak");
+    }
+    return;
+  }
+  if (erTest) r.tekst = "TEST: " + r.tekst;
+  registrer(r);
+}
+
+/* ---------- StreamElements ---------- */
+function kobleTil() {
+  const jwt = $("jwt").value.trim();
+  if (!jwt) { logg("Mangler JWT token", "feil"); status("Mangler token", "feil"); return; }
+  if (!bruker) { logg("Du må være logget inn på tavla først", "feil"); return; }
+  skriv(NOKKEL_JWT, jwt);
+  if (socket) { const gammel = socket; socket = null; gammel.disconnect(); }
+
+  status("Kobler til StreamElements", "venter");
+  $("start").disabled = true;
+
+  socket = io("https://realtime.streamelements.com", { transports: ["websocket"] });
+
+  socket.on("connect", () => socket.emit("authenticate", { method: "jwt", token: jwt }));
+  socket.on("authenticated", () => {
+    status("Lytter på StreamElements", "pa");
+    logg("Klar. Donasjoner, subs og bits telles automatisk.", "ok");
+    $("stopp").disabled = false;
+  });
+  socket.on("unauthorized", () => {
+    status("StreamElements avviste tokenet", "feil");
+    logg("Tokenet ble avvist. Sjekk at du har kopiert hele.", "feil");
+    socket.disconnect(); socket = null;
+    $("start").disabled = false; $("stopp").disabled = true;
+  });
+  socket.on("disconnect", () => { if (socket) status("Mistet forbindelsen, prøver igjen", "feil"); });
+  socket.on("connect_error", err => logg("Tilkoblingsfeil: " + err.message, "feil"));
+
+  socket.on("event", e => handter(e, false));
+  socket.on("event:test", e => {
+    const h = fraTest(e); if (!h) return;
+    if (!$("test").checked) {
+      if (["tip", "cheer", "subscriber"].includes(h.type)) logg("Testhendelse mottatt, ikke telt", "svak");
+      return;
+    }
+    handter(h, true);
+  });
+}
+
+$("start").addEventListener("click", async () => {
+  if (!bruker) {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      await signInWithEmailAndPassword(auth, $("epost").value.trim(), $("passord").value);
+      $("passord").value = "";
+    } catch {
+      logg("Feil e post eller passord til tavla", "feil");
+      status("Innlogging feilet", "feil");
+      return;
+    }
+    return; // onAuthStateChanged kobler til
+  }
+  kobleTil();
+});
+
+$("stopp").addEventListener("click", () => {
+  const s = socket; socket = null;
+  if (s) s.disconnect();
+  status("Koblet fra", "");
+  logg("Koblet fra StreamElements.");
+  $("start").disabled = false; $("stopp").disabled = true;
+});
+
+$("glem").addEventListener("click", () => {
+  skriv(NOKKEL_JWT, null); $("jwt").value = "";
+  logg("Tokenet er slettet fra denne maskinen.");
+});
+
+/* ---------- oppstart ---------- */
+onAuthStateChanged(auth, user => {
+  if (user && !ADMINER.includes(user.uid)) {
+    bruker = null;
+    status("Denne brukeren har ikke tilgang", "feil");
+    return;
+  }
+  bruker = user;
+  $("loginfelt").hidden = !!user;
+  $("innlogget").hidden = !user;
+  if (user) {
+    $("innlogget").innerHTML = "Logget inn som <b></b>";
+    $("innlogget").querySelector("b").textContent = user.email || "";
+  }
+
+  if (!user) { status("Ikke logget inn", ""); return; }
+
+  if (!lytterInnst) {
+    lytterInnst = true;
+    onValue(ref(db, "innst"), s => { innst = { ...STANDARD, ...(s.val() || {}) }; });
+  }
+  // Starter av seg selv når OBS åpner siden, hvis alt er lagret
+  if ($("jwt").value.trim() && !socket) kobleTil();
+  else if (!socket) status("Lim inn tokenet og trykk Koble til", "venter");
+});
+</script>
+</body>
+</html>
